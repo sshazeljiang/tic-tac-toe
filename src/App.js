@@ -1,3 +1,4 @@
+import { set } from "mongoose";
 import { useState } from "react";
 
 function Square({ value, onSquareClick }) {
@@ -50,6 +51,7 @@ export default function Game() {
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
+  const [showAscending, setShowAscending] = useState(false);
 
   function handlePlay(nextSquares) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
@@ -61,22 +63,43 @@ export default function Game() {
     setCurrentMove(nextMove);
   }
 
-  const moves = history.map((squares, move) => {
-    let description;
-    if (move === currentMove) {
-      description = "You are at move " + (move + 1);
-      return <li key={move}>{description}</li>;
-    } else if (move > 0) {
-      description = "Go to move #" + move;
-    } else {
-      description = "Go to game start";
-    }
-    return (
-      <li key={move}>
-        <button onClick={() => jumpTo(move)}>{description}</button>
-      </li>
-    );
-  });
+  const moves = showAscending
+    ? history.map((squares, move) => {
+        let description;
+        if (move === currentMove) {
+          description = "You are at move " + move;
+          return <li key={move}>{description}</li>;
+        } else if (move > 0) {
+          description = "Go to move #" + move;
+        } else {
+          description = "Go to game start";
+        }
+        return (
+          <li key={move}>
+            <button onClick={() => jumpTo(move)}>{description}</button>
+          </li>
+        );
+      })
+    : history
+        .slice()
+        .reverse()
+        .map((squares, move) => {
+          move = history.length - move - 1;
+          let description;
+          if (move === currentMove) {
+            description = "You are at move " + (move + 1);
+            return <li key={move}>{description}</li>;
+          } else if (move > 0) {
+            description = "Go to move #" + move;
+          } else {
+            description = "Go to game start";
+          }
+          return (
+            <li key={move}>
+              <button onClick={() => jumpTo(move)}>{description}</button>
+            </li>
+          );
+        });
 
   return (
     <div className="game">
@@ -84,6 +107,11 @@ export default function Game() {
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
+        <button onClick={() => setShowAscending(!showAscending)}>
+          {showAscending
+            ? "Show in Descending Order"
+            : "Show in Ascending Order"}
+        </button>
         <ol>{moves}</ol>
       </div>
     </div>
