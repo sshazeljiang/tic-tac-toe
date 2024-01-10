@@ -1,9 +1,9 @@
-import { set } from "mongoose";
 import { useState } from "react";
 
-function Square({ value, onSquareClick }) {
+function Square({ value, onSquareClick, highlight }) {
+  const className = "square" + (highlight ? " square-highlight" : "");
   return (
-    <button className="square" onClick={onSquareClick}>
+    <button className={className} onClick={onSquareClick}>
       {value}
     </button>
   );
@@ -11,10 +11,13 @@ function Square({ value, onSquareClick }) {
 
 function Board({ xIsNext, squares, onPlay }) {
   const winner = calculateWinner(squares);
+  const draw = checkDraw(squares);
+
   let status;
   status = winner
-    ? "Winner: " + winner
+    ? "Winner: " + squares[winner[0]]
     : "Next player: " + (xIsNext ? "X" : "O");
+  status = draw ? "Draw" : status;
 
   function handleClick(i) {
     if (squares[i] || calculateWinner(squares)) {
@@ -32,13 +35,19 @@ function Board({ xIsNext, squares, onPlay }) {
       <div>
         {[0, 3, 6].map((row) => (
           <div className="board-row" key={row}>
-            {[0, 1, 2].map((col) => (
-              <Square
-                key={row + col}
-                value={squares[row + col]}
-                onSquareClick={() => handleClick(row + col)}
-              />
-            ))}
+            {[0, 1, 2].map((col) => {
+              const index = row + col;
+              const isWinningSquare = winner && winner.includes(index);
+
+              return (
+                <Square
+                  key={index}
+                  value={squares[index]}
+                  onSquareClick={() => handleClick(index)}
+                  highlight={isWinningSquare}
+                />
+              );
+            })}
           </div>
         ))}
       </div>
@@ -51,7 +60,7 @@ export default function Game() {
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
-  const [showAscending, setShowAscending] = useState(false);
+  const [showAscending, setShowAscending] = useState(true);
 
   function handlePlay(nextSquares) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
@@ -132,8 +141,12 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return [a, b, c];
     }
   }
   return null;
+}
+
+function checkDraw(squares) {
+  return squares.every((square) => square !== null);
 }
