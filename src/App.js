@@ -26,7 +26,7 @@ function Board({ xIsNext, squares, onPlay }) {
 
     const nextSquares = squares.slice();
     nextSquares[i] = xIsNext ? "X" : "O";
-    onPlay(nextSquares);
+    onPlay(nextSquares, i);
   }
 
   return (
@@ -56,14 +56,23 @@ function Board({ xIsNext, squares, onPlay }) {
 }
 
 export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [history, setHistory] = useState([
+    { squares: Array(9).fill(null), index: Array(2).fill(null) },
+  ]);
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
-  const currentSquares = history[currentMove];
+  const currentSquares = history[currentMove].squares;
   const [showAscending, setShowAscending] = useState(true);
 
-  function handlePlay(nextSquares) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+  function handlePlay(nextSquares, index) {
+    const nextIndex = [Math.floor(index / 3), index % 3];
+    const nextHistory = [
+      ...history.slice(0, currentMove + 1),
+      {
+        squares: nextSquares,
+        index: nextIndex,
+      },
+    ];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
@@ -73,13 +82,20 @@ export default function Game() {
   }
 
   const moves = showAscending
-    ? history.map((squares, move) => {
+    ? history.map((step, move) => {
         let description;
         if (move === currentMove) {
           description = "You are at move " + move;
           return <li key={move}>{description}</li>;
         } else if (move > 0) {
-          description = "Go to move #" + move;
+          description =
+            "Go to move #" +
+            move +
+            " at (" +
+            step.index[0] +
+            ", " +
+            step.index[1] +
+            ")";
         } else {
           description = "Go to game start";
         }
@@ -92,14 +108,21 @@ export default function Game() {
     : history
         .slice()
         .reverse()
-        .map((squares, move) => {
+        .map((step, move) => {
           move = history.length - move - 1;
           let description;
           if (move === currentMove) {
-            description = "You are at move " + (move + 1);
+            description = "You are at move " + move;
             return <li key={move}>{description}</li>;
           } else if (move > 0) {
-            description = "Go to move #" + move;
+            description =
+              "Go to move #" +
+              move +
+              " at (" +
+              step.index[0] +
+              ", " +
+              step.index[1] +
+              ")";
           } else {
             description = "Go to game start";
           }
