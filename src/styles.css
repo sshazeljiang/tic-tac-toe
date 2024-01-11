@@ -92,3 +92,8 @@ body {
 .square-highlight {
   background-color: cadetblue;
 }
+
+.function-button {
+  margin-left: 10px;
+  margin-right: 10px;
+}

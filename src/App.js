@@ -139,10 +139,24 @@ export default function Game() {
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
-        <button onClick={() => setShowAscending(!showAscending)}>
+        <button
+          className="function-button"
+          onClick={() => {
+            setHistory([
+              { squares: Array(9).fill(null), index: Array(2).fill(null) },
+            ]);
+            setCurrentMove(0);
+          }}
+        >
+          {"Restart Game"}
+        </button>
+        <button
+          className="function-button"
+          onClick={() => setShowAscending(!showAscending)}
+        >
           {showAscending
-            ? "Show in Descending Order"
-            : "Show in Ascending Order"}
+            ? "Show History in Descending Order"
+            : "Show History in Ascending Order"}
         </button>
         <ol>{moves}</ol>
       </div>
